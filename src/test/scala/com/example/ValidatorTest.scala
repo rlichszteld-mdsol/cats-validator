@@ -10,7 +10,7 @@ class ValidatorTest extends WordSpec with Matchers {
     "pass original value through" in {
       val data = "boo"
 
-      BusinessValidation.passthroughValidation(data) shouldBeValid data
+      BusinessValidation.accept(data) shouldBeValid data
     }
   }
 }

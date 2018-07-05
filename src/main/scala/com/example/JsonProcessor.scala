@@ -21,16 +21,13 @@ object JsValueConverters {
 
 object JsonProcessor extends Validation {
 
-  def processField[T <: JsValue: Manifest, U](obj: JsObject,
-                                              fieldName: String,
-                                              parse: T => U,
-                                              validate: BusinessValidation[U] = passthroughValidation[U])(
+  def processField[T <: JsValue: Manifest, U](obj: JsObject, fieldName: String, parse: T => U)(
       implicit requestedType: ClassTag[T]
   ): ValidationResult[U] = {
     obj.fields.get(fieldName) match {
       case Some(field) =>
         Try(manifest[T].runtimeClass.cast(field).asInstanceOf[T]) match {
-          case Success(value) => parse(value).validNel.andThen(validate)
+          case Success(value) => parse(value).validNel
           case Failure(_: ClassCastException) =>
             InvalidFieldTypeError(fieldName, requestedType.runtimeClass.getSimpleName, field.getClass.getSimpleName).invalidNel
           case Failure(e) => throw e
@@ -39,21 +36,15 @@ object JsonProcessor extends Validation {
     }
   }
 
-  def readString(obj: JsObject,
-                 fieldName: String,
-                 validate: BusinessValidation[String] = passthroughValidation[String]): ValidationResult[String] = {
-    processField(obj, fieldName, JsValueConverters.stringConverter, validate)
+  def readString(obj: JsObject, fieldName: String): ValidationResult[String] = {
+    processField(obj, fieldName, JsValueConverters.stringConverter)
   }
 
-  def readInt(obj: JsObject,
-              fieldName: String,
-              validate: BusinessValidation[Int] = passthroughValidation[Int]): ValidationResult[Int] = {
-    processField(obj, fieldName, JsValueConverters.intConverter, validate)
+  def readInt(obj: JsObject, fieldName: String): ValidationResult[Int] = {
+    processField(obj, fieldName, JsValueConverters.intConverter)
   }
 
-  def readUuid(obj: JsObject,
-               fieldName: String,
-               validate: BusinessValidation[UUID] = passthroughValidation[UUID]): ValidationResult[UUID] = {
-    processField(obj, fieldName, JsValueConverters.uuidConverter, validate)
+  def readUuid(obj: JsObject, fieldName: String): ValidationResult[UUID] = {
+    processField(obj, fieldName, JsValueConverters.uuidConverter)
   }
 }

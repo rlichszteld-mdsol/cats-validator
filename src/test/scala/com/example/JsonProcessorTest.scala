@@ -41,14 +41,5 @@ class JsonProcessorTest extends WordSpec with Matchers with Validation {
       value shouldBeValid UUID.fromString("4a1eb5a3-447e-4143-a00d-bba7d926fd3f")
     }
 
-    "chain business validation after successful parsing and provide value on success" in {
-      val result = JsonProcessor.readString(jsObject, "title", BusinessValidation.validateTitle)
-      result shouldBeValid "Some title"
-    }
-
-    "chain business validation after successful parsing and return error on failure" in {
-      val result = JsonProcessor.readInt(jsObject, "age", BusinessValidation.validateAge)
-      result shouldBeError AgeValidationError(15)
-    }
   }
 }
