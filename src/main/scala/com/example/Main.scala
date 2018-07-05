@@ -3,7 +3,8 @@ import java.util.UUID
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import cats.implicits._
-import com.example.{JsonProcessor, ValidationError}
+import com.example.JsonProcessor
+import com.example.validation.ValidationError
 
 case class Data(uuid: UUID, title: String, version: Int)
 

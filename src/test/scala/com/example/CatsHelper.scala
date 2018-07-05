@@ -3,9 +3,10 @@ package com.example
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits._
+import com.example.validation.Validation
 import org.scalatest.{Assertion, Matchers}
 
-object CatsHelper extends Validator with Matchers {
+object CatsHelper extends Validation with Matchers {
   implicit class ValidatedNelExtension[E, R](result: ValidatedNel[E, R]) {
     def shouldBeError(error: E): Assertion = {
       result shouldBe error.invalidNel
