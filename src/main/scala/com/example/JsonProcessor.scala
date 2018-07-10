@@ -2,13 +2,12 @@ package com.example
 
 import java.util.UUID
 
+import cats.implicits._
+import com.example.validation.{InvalidFieldTypeError, MissingFieldError, Parsing}
 import spray.json.{JsNumber, JsObject, JsString, JsValue}
 
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
-import cats.implicits._
-import com.example.validation.{InvalidFieldTypeError, MissingFieldError, Validation}
-import com.example.validation.BusinessValidation._
 
 object JsValueConverters {
   def stringConverter: JsString => String = _.value
@@ -19,11 +18,11 @@ object JsValueConverters {
     string => UUIDParser.parseString(string.value)
 }
 
-object JsonProcessor extends Validation {
+object JsonProcessor extends Parsing {
 
   def processField[T <: JsValue: Manifest, U](obj: JsObject, fieldName: String, parse: T => U)(
       implicit requestedType: ClassTag[T]
-  ): ValidationResult[U] = {
+  ): Parsed[U] = {
     obj.fields.get(fieldName) match {
       case Some(field) =>
         Try(manifest[T].runtimeClass.cast(field).asInstanceOf[T]) match {
@@ -36,15 +35,15 @@ object JsonProcessor extends Validation {
     }
   }
 
-  def readString(obj: JsObject, fieldName: String): ValidationResult[String] = {
+  def readString(obj: JsObject, fieldName: String): Parsed[String] = {
     processField(obj, fieldName, JsValueConverters.stringConverter)
   }
 
-  def readInt(obj: JsObject, fieldName: String): ValidationResult[Int] = {
+  def readInt(obj: JsObject, fieldName: String): Parsed[Int] = {
     processField(obj, fieldName, JsValueConverters.intConverter)
   }
 
-  def readUuid(obj: JsObject, fieldName: String): ValidationResult[UUID] = {
+  def readUuid(obj: JsObject, fieldName: String): Parsed[UUID] = {
     processField(obj, fieldName, JsValueConverters.uuidConverter)
   }
 }

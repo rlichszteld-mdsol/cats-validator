@@ -3,7 +3,7 @@ package com.example
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits._
-import com.example.validation.Validation
+import com.example.validation.common.Validation
 import org.scalatest.{Assertion, Matchers}
 
 object CatsHelper extends Validation with Matchers {

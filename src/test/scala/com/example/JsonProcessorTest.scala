@@ -5,6 +5,7 @@ import java.util.UUID
 import CatsHelper._
 import cats.data.ValidatedNel
 import com.example.validation._
+import com.example.validation.common.Validation
 import org.scalatest.{Matchers, WordSpec}
 import spray.json._
 
@@ -23,15 +24,13 @@ class JsonProcessorTest extends WordSpec with Matchers with Validation {
 
   "#processField" should {
     "return MissingFieldError when field does not exist" in {
-      val result: ValidatedNel[ValidationError, String] =
-        JsonProcessor.processField(jsObject, "boo", (x: JsValue) => x.toString())
+      val result = JsonProcessor.processField(jsObject, "boo", (x: JsValue) => x.toString())
 
       result shouldBeError MissingFieldError("boo")
     }
 
     "return InvalidFieldTypeError when field is not of the requested type" in {
-      val result: ValidatedNel[ValidationError, Int] =
-        JsonProcessor.processField(jsObject, "version", (x: JsNumber) => x.value.toInt)
+      val result = JsonProcessor.processField(jsObject, "version", (x: JsNumber) => x.value.toInt)
 
       result shouldBeError InvalidFieldTypeError("version", "JsNumber", "JsString")
     }
