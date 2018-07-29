@@ -22,3 +22,10 @@ lazy val example = (project in file("example"))
     libraryDependencies ++= Dependencies.compileDeps ++ Dependencies.testDeps
   )
   .dependsOn(core % "compile->compile;test->test")
+
+lazy val jsonParsing = (project in file("json-parsing"))
+  .settings(
+    commonSettings,
+    name := "json-parsing",
+    libraryDependencies ++= Dependencies.compileDeps ++ Dependencies.testDeps
+  )
