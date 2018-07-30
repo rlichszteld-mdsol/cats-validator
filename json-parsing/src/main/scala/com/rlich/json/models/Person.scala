@@ -5,7 +5,7 @@ import com.rlich.json.parsing.JsonParsing.{OptionalField, Parsed, ParsingProtoco
 import spray.json.JsObject
 import cats.implicits._
 
-case class Person(name: String, nickname: OptionalField[String])
+case class Person(name: String, nickname: OptionalField[String], age: Option[Int])
 
 trait PersonParsingProtocol {
 
@@ -15,6 +15,7 @@ trait PersonParsingProtocol {
       (
         readString(obj, "name"),
         readStringOptional(obj, "nickname"),
+        readOptionInt(obj, "age")
       ).mapN(Person)
     }
   }

@@ -4,7 +4,7 @@ import java.util.UUID
 import com.rlich.json.parsing.CommonErrors.{FieldTypeError, MissingFieldError}
 import com.rlich.json.parsing.JsonParsing._
 import com.rlich.json.utils.UUIDParser
-import spray.json.{JsNumber, JsObject, JsString, JsValue}
+import spray.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue}
 
 object CommonErrors {
   case class MissingFieldError(fieldName: String) extends ParsingError
@@ -20,6 +20,10 @@ trait CommonJsValueConverters {
 
   def intConverter: JsConverter[Int] = {
     case number: JsNumber => number.value.toInt
+  }
+
+  def booleanConverter: JsConverter[Boolean] = {
+    case bool: JsBoolean => bool.value
   }
 
   def uuidConverter: JsConverter[UUID] = {
@@ -54,6 +58,13 @@ trait DefaultJsonParseSupport extends JsonParseSupport with CommonJsValueConvert
     readField(obj, fieldName, uuidConverter, onParseError, onFieldMissing)
   }
 
+  def readBool(obj: JsObject,
+               fieldName: String,
+               onParseError: ParseErrorHandler = defaultParseErrorHandler,
+               onFieldMissing: MissingFieldErrorHandler = defaultMissingFieldHandler): Parsed[Boolean] = {
+    readField(obj, fieldName, booleanConverter, onParseError, onFieldMissing)
+  }
+
   def readStringOptional(obj: JsObject,
                          fieldName: String,
                          onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[OptionalField[String]] = {
@@ -70,6 +81,40 @@ trait DefaultJsonParseSupport extends JsonParseSupport with CommonJsValueConvert
                        fieldName: String,
                        onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[OptionalField[UUID]] = {
     readFieldOptional(obj, fieldName, uuidConverter, onParseError)
+  }
+
+  def readBoolOptional(
+      obj: JsObject,
+      fieldName: String,
+      onParseError: ParseErrorHandler = defaultParseErrorHandler
+  ): Parsed[OptionalField[Boolean]] = {
+    readFieldOptional(obj, fieldName, booleanConverter, onParseError)
+  }
+
+  def readOptionString(obj: JsObject,
+                       fieldName: String,
+                       onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[Option[String]] = {
+    readOptionField(obj, fieldName, stringConverter, onParseError)
+  }
+
+  def readOptionInt(obj: JsObject,
+                    fieldName: String,
+                    onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[Option[Int]] = {
+    readOptionField(obj, fieldName, intConverter, onParseError)
+  }
+
+  def readOptionUuid(obj: JsObject,
+                     fieldName: String,
+                     onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[Option[UUID]] = {
+    readOptionField(obj, fieldName, uuidConverter, onParseError)
+  }
+
+  def readOptionBool(
+      obj: JsObject,
+      fieldName: String,
+      onParseError: ParseErrorHandler = defaultParseErrorHandler
+  ): Parsed[Option[Boolean]] = {
+    readOptionField(obj, fieldName, booleanConverter, onParseError)
   }
 
   def readObject[U: ParsingProtocol](obj: JsObject, fieldName: String): Parsed[U] = {

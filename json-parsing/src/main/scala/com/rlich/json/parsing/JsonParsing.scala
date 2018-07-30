@@ -3,7 +3,7 @@ package com.rlich.json.parsing
 import cats.data.ValidatedNel
 import cats.implicits._
 import com.rlich.json.parsing.JsonParsing._
-import spray.json.{JsObject, JsValue}
+import spray.json._
 
 package object JsonParsing {
   trait ParsingError
@@ -30,6 +30,21 @@ trait JsonParseSupport {
       case Some(value: JsValue) =>
         parse.lift(value).map(_.validNel).getOrElse(onParseError(fieldName, value).invalidNel)
       case None => onFieldMissing(fieldName).invalidNel
+    }
+  }
+
+  protected def readOptionField[U](obj: JsObject,
+                                   fieldName: String,
+                                   parse: JsConverter[U],
+                                   onParseError: ParseErrorHandler): Parsed[Option[U]] = {
+    obj.fields.get(fieldName) match {
+      case Some(anyValue) =>
+        anyValue match {
+          case value if value == JsNull => None.validNel
+          case value =>
+            parse.lift(value).map(Some(_).validNel).getOrElse(onParseError(fieldName, value).invalidNel)
+        }
+      case None => None.validNel
     }
   }
 
