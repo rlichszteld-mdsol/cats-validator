@@ -1,9 +1,9 @@
-package com.rlich.json.models
+package com.rlich.json.v1.models
 
-import com.rlich.json.parsing.DefaultJsonParseSupport
-import com.rlich.json.parsing.JsonParsing.{OptionalField, Parsed, ParsingProtocol}
-import spray.json.JsObject
 import cats.implicits._
+import com.rlich.json.core.{OptionalField, Parsed, ParsingProtocol}
+import com.rlich.json.v1.parsing.DefaultJsonParseSupport
+import spray.json.JsValue
 
 case class Person(name: String, nickname: OptionalField[String], age: Option[Int])
 
@@ -11,7 +11,8 @@ trait PersonParsingProtocol {
 
   implicit object PersonParsingFormat extends ParsingProtocol[Person] with DefaultJsonParseSupport {
 
-    override def read(obj: JsObject): Parsed[Person] = {
+    override def read(value: JsValue): Parsed[Person] = {
+      val obj = value.asJsObject
       (
         readString(obj, "name"),
         readStringOptional(obj, "nickname"),

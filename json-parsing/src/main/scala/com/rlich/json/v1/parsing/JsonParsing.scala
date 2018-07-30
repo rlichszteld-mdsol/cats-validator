@@ -1,24 +1,8 @@
-package com.rlich.json.parsing
+package com.rlich.json.v1.parsing
 
-import cats.data.ValidatedNel
+import com.rlich.json.core._
 import cats.implicits._
-import com.rlich.json.parsing.JsonParsing._
 import spray.json._
-
-package object JsonParsing {
-  trait ParsingError
-
-  type OptionalField[T] = Either[Unit.type, T]
-  type Parsed[T] = ValidatedNel[ParsingError, T]
-  type ParseErrorHandler = (String, JsValue) => ParsingError
-  type MissingFieldErrorHandler = String => ParsingError
-
-  type JsConverter[T] = PartialFunction[JsValue, T]
-
-  trait ParsingProtocol[T] {
-    def read(obj: JsObject): Parsed[T]
-  }
-}
 
 trait JsonParseSupport {
   protected def readField[U](obj: JsObject,

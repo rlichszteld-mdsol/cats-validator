@@ -1,9 +1,10 @@
 package com.rlich.json
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
-import com.rlich.json.models.ExampleData
-import com.rlich.json.parsing.JsonParser
-import com.rlich.json.parsing.JsonParsing.Parsed
+import com.rlich.json.core.Parsed
+import com.rlich.json.v1.models.ExampleData
+import com.rlich.json.v1.parsing.JsonParser
+import com.rlich.json.v2.models.TestModel
 import spray.json._
 
 object Main extends App {
@@ -15,7 +16,8 @@ object Main extends App {
       | "version": 2,
       | "age": 15,
       | "person": {
-      |   "name": "Johny Cash"
+      |   "name": "Johny Cash",
+      |   "age": null
       | }
       |}
     """.stripMargin
@@ -40,10 +42,9 @@ object Main extends App {
         println("Validation errors:")
         nel.toList.foreach(error => println(s" - $error"))
     }
-
   }
 
-  import com.rlich.json.models.ExampleDataParsingProtocol._
+  import com.rlich.json.v1.models.ExampleDataParsingProtocol._
 
   val validResult = JsonParser.parse[ExampleData](validObj)
   processResult(validResult)
@@ -51,4 +52,23 @@ object Main extends App {
   import JsonParser._
   val invalidResult = invalidObj.parseAs[ExampleData]
   processResult(invalidResult)
+
+  val v2json =
+    """
+      | {
+      |   "string_data": "A text",
+      |   "int_data": 2018,
+      |   "bool_data": true,
+      |   "optional_field": null,
+      |   "child": {
+      |     "field1": "foo",
+      |     "field2": 3
+      |   }
+      | }
+    """.stripMargin
+  val v2obj = v2json.parseJson.asJsObject
+
+  import com.rlich.json.v2.models.TestModelParsingProtocol._
+  val v2Result = v2obj.parseAs[TestModel]
+  processResult(v2Result)
 }

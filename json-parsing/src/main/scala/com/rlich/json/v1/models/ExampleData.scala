@@ -1,11 +1,11 @@
-package com.rlich.json.models
+package com.rlich.json.v1.models
 
 import java.util.UUID
 
 import cats.implicits._
-import com.rlich.json.parsing.DefaultJsonParseSupport
-import com.rlich.json.parsing.JsonParsing._
-import spray.json.JsObject
+import com.rlich.json.core.{OptionalField, Parsed, ParsingProtocol}
+import com.rlich.json.v1.parsing.DefaultJsonParseSupport
+import spray.json.JsValue
 
 case class ExampleData(uuid: UUID, title: String, age: Int, version: Int, option: OptionalField[String], person: Person)
 
@@ -15,7 +15,8 @@ trait ExampleDataParsingProtocol {
 
     import PersonParsingProtocol._
 
-    override def read(obj: JsObject): Parsed[ExampleData] = {
+    override def read(value: JsValue): Parsed[ExampleData] = {
+      val obj = value.asJsObject
       (
         readUuid(obj, "uuid"),
         readString(obj, "title"),

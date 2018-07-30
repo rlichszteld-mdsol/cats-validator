@@ -1,16 +1,10 @@
-package com.rlich.json.parsing
+package com.rlich.json.v1.parsing
 import java.util.UUID
 
-import com.rlich.json.parsing.CommonErrors.{FieldTypeError, MissingFieldError}
-import com.rlich.json.parsing.JsonParsing._
+import com.rlich.json.core.CommonErrors.{FieldTypeError, MissingFieldError}
+import com.rlich.json.core._
 import com.rlich.json.utils.UUIDParser
 import spray.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue}
-
-object CommonErrors {
-  case class MissingFieldError(fieldName: String) extends ParsingError
-
-  case class FieldTypeError(fieldName: String, value: JsValue) extends ParsingError
-}
 
 trait CommonJsValueConverters {
 
@@ -32,10 +26,9 @@ trait CommonJsValueConverters {
 }
 
 trait DefaultJsonParseSupport extends JsonParseSupport with CommonJsValueConverters {
-  def defaultMissingFieldHandler: String => MissingFieldError = fieldName => MissingFieldError(fieldName)
+  def defaultMissingFieldHandler: MissingFieldErrorHandler = fieldName => MissingFieldError(fieldName)
 
-  def defaultParseErrorHandler: (String, JsValue) => FieldTypeError =
-    (fieldName: String, value: JsValue) => FieldTypeError(fieldName, value)
+  def defaultParseErrorHandler: ParseErrorHandler = (fieldName, value) => FieldTypeError(fieldName, value)
 
   def readString(obj: JsObject,
                  fieldName: String,
