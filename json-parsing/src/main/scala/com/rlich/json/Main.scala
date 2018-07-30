@@ -13,7 +13,10 @@ object Main extends App {
       | "uuid": "4a1eb5a3-447e-4143-a00d-bba7d926fd3f",
       | "title": "Some long title",
       | "version": 2,
-      | "age": 15
+      | "age": 15,
+      | "person": {
+      |   "name": "Johny Cash"
+      | }
       |}
     """.stripMargin
   val validObj = validJson.parseJson.asJsObject

@@ -11,6 +11,7 @@ package object JsonParsing {
   type OptionalField[T] = Either[Unit.type, T]
   type Parsed[T] = ValidatedNel[ParsingError, T]
   type ParseErrorHandler = (String, JsValue) => ParsingError
+  type MissingFieldErrorHandler = String => ParsingError
 
   type JsConverter[T] = PartialFunction[JsValue, T]
 
@@ -24,7 +25,7 @@ trait JsonParseSupport {
                              fieldName: String,
                              parse: JsConverter[U],
                              onParseError: ParseErrorHandler,
-                             onFieldMissing: String => ParsingError): Parsed[U] = {
+                             onFieldMissing: MissingFieldErrorHandler): Parsed[U] = {
     obj.fields.get(fieldName) match {
       case Some(value: JsValue) =>
         parse.lift(value).map(_.validNel).getOrElse(onParseError(fieldName, value).invalidNel)
@@ -40,6 +41,15 @@ trait JsonParseSupport {
       case Some(value: JsValue) =>
         parse.lift(value).map(Right(_).validNel).getOrElse(onParseError(fieldName, value).invalidNel)
       case None => Left(Unit).validNel
+    }
+  }
+
+  protected def readObjectField[U: ParsingProtocol](obj: JsObject,
+                                                    fieldName: String,
+                                                    onFieldMissing: String => ParsingError): Parsed[U] = {
+    obj.fields.get(fieldName) match {
+      case Some(jsObject: JsObject) => implicitly[ParsingProtocol[U]].read(jsObject)
+      case None => onFieldMissing(fieldName).invalidNel
     }
   }
 }

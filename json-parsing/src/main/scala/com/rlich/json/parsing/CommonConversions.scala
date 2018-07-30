@@ -2,7 +2,7 @@ package com.rlich.json.parsing
 import java.util.UUID
 
 import com.rlich.json.parsing.CommonErrors.{FieldTypeError, MissingFieldError}
-import com.rlich.json.parsing.JsonParsing.{JsConverter, OptionalField, Parsed, ParsingError}
+import com.rlich.json.parsing.JsonParsing._
 import com.rlich.json.utils.UUIDParser
 import spray.json.{JsNumber, JsObject, JsString, JsValue}
 
@@ -33,27 +33,46 @@ trait DefaultJsonParseSupport extends JsonParseSupport with CommonJsValueConvert
   def defaultParseErrorHandler: (String, JsValue) => FieldTypeError =
     (fieldName: String, value: JsValue) => FieldTypeError(fieldName, value)
 
-  def readString(obj: JsObject, fieldName: String): Parsed[String] = {
-    readField(obj, fieldName, stringConverter, defaultParseErrorHandler, defaultMissingFieldHandler)
+  def readString(obj: JsObject,
+                 fieldName: String,
+                 onParseError: ParseErrorHandler = defaultParseErrorHandler,
+                 onFieldMissing: MissingFieldErrorHandler = defaultMissingFieldHandler): Parsed[String] = {
+    readField(obj, fieldName, stringConverter, onParseError, onFieldMissing)
   }
 
-  def readInt(obj: JsObject, fieldName: String): Parsed[Int] = {
-    readField(obj, fieldName, intConverter, defaultParseErrorHandler, defaultMissingFieldHandler)
+  def readInt(obj: JsObject,
+              fieldName: String,
+              onParseError: ParseErrorHandler = defaultParseErrorHandler,
+              onFieldMissing: MissingFieldErrorHandler = defaultMissingFieldHandler): Parsed[Int] = {
+    readField(obj, fieldName, intConverter, onParseError, onFieldMissing)
   }
 
-  def readUuid(obj: JsObject, fieldName: String): Parsed[UUID] = {
-    readField(obj, fieldName, uuidConverter, defaultParseErrorHandler, defaultMissingFieldHandler)
+  def readUuid(obj: JsObject,
+               fieldName: String,
+               onParseError: ParseErrorHandler = defaultParseErrorHandler,
+               onFieldMissing: MissingFieldErrorHandler = defaultMissingFieldHandler): Parsed[UUID] = {
+    readField(obj, fieldName, uuidConverter, onParseError, onFieldMissing)
   }
 
-  def readStringOptional(obj: JsObject, fieldName: String): Parsed[OptionalField[String]] = {
-    readFieldOptional(obj, fieldName, stringConverter, defaultParseErrorHandler)
+  def readStringOptional(obj: JsObject,
+                         fieldName: String,
+                         onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[OptionalField[String]] = {
+    readFieldOptional(obj, fieldName, stringConverter, onParseError)
   }
 
-  def readIntOptional(obj: JsObject, fieldName: String): Parsed[OptionalField[Int]] = {
-    readFieldOptional(obj, fieldName, intConverter, defaultParseErrorHandler)
+  def readIntOptional(obj: JsObject,
+                      fieldName: String,
+                      onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[OptionalField[Int]] = {
+    readFieldOptional(obj, fieldName, intConverter, onParseError)
   }
 
-  def readUuidOptional(obj: JsObject, fieldName: String): Parsed[OptionalField[UUID]] = {
-    readFieldOptional(obj, fieldName, uuidConverter, defaultParseErrorHandler)
+  def readUuidOptional(obj: JsObject,
+                       fieldName: String,
+                       onParseError: ParseErrorHandler = defaultParseErrorHandler): Parsed[OptionalField[UUID]] = {
+    readFieldOptional(obj, fieldName, uuidConverter, onParseError)
+  }
+
+  def readObject[U: ParsingProtocol](obj: JsObject, fieldName: String): Parsed[U] = {
+    readObjectField(obj, fieldName, defaultMissingFieldHandler)
   }
 }

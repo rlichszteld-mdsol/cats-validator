@@ -1,10 +1,9 @@
 package com.rlich.cats.validation
 
-import cats.data.ValidatedNel
-import com.rlich.cats.validation.common.ValidationError
+import com.rlich.cats.validation.common.{Validation, ValidationError}
 
 trait ParsingError extends ValidationError
 
-trait Parsing {
-  type Parsed[A] = ValidatedNel[ParsingError, A]
+trait Parsing extends Validation {
+  type Parsed[A] = ValidationResult[ParsingError, A]
 }
