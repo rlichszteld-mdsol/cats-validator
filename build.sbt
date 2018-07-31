@@ -6,7 +6,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core, example)
+  .aggregate(core, example, jsonParsing)
 
 lazy val core = (project in file("core"))
   .settings(

@@ -1,9 +1,9 @@
 package com.rlich.json
+
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import com.rlich.json.core.Parsed
 import com.rlich.json.v1.models.ExampleData
-import com.rlich.json.v1.parsing.JsonParser
 import com.rlich.json.v2.models.TestModel
 import spray.json._
 
@@ -44,14 +44,16 @@ object Main extends App {
     }
   }
 
-  import com.rlich.json.v1.models.ExampleDataParsingProtocol._
+  {
+    import com.rlich.json.v1.parsing.JsonParser._
+    import com.rlich.json.v1.models.ExampleDataParsingProtocol._
 
-  val validResult = JsonParser.parse[ExampleData](validObj)
-  processResult(validResult)
+    val validResult = com.rlich.json.v1.parsing.JsonParser.parse[ExampleData](validObj)
+    processResult(validResult)
 
-  import JsonParser._
-  val invalidResult = invalidObj.parseAs[ExampleData]
-  processResult(invalidResult)
+    val invalidResult = invalidObj.parseAs[ExampleData]
+    processResult(invalidResult)
+  }
 
   val v2json =
     """
@@ -68,7 +70,12 @@ object Main extends App {
     """.stripMargin
   val v2obj = v2json.parseJson.asJsObject
 
-  import com.rlich.json.v2.models.TestModelParsingProtocol._
-  val v2Result = v2obj.parseAs[TestModel]
-  processResult(v2Result)
+  {
+    import com.rlich.json.v2.parsing.JsonParser._
+    import com.rlich.json.v2.parsing.DefaultJsonParseSupport._
+    import com.rlich.json.v2.models.TestModelParsingProtocol._
+
+    val v2Result = v2obj.parseAs[TestModel](defaultParseErrorHandler)
+    processResult(v2Result)
+  }
 }

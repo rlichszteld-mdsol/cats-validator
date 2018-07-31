@@ -4,7 +4,8 @@ import java.util.UUID
 import com.rlich.json.core.CommonErrors.{FieldTypeError, MissingFieldError}
 import com.rlich.json.core._
 import com.rlich.json.utils.UUIDParser
-import spray.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue}
+import com.rlich.json.v1.core.{JsConverter, MissingFieldErrorHandler, ParseErrorHandler, ParsingProtocol}
+import spray.json.{JsBoolean, JsNumber, JsObject, JsString}
 
 trait CommonJsValueConverters {
 

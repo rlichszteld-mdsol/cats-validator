@@ -2,50 +2,57 @@ package com.rlich.json.v2.parsing
 
 import cats.implicits._
 import com.rlich.json.core._
-import spray.json.{JsNull, JsObject, JsValue}
+import com.rlich.json.v2.core.{MissingFieldErrorHandler, ParseFieldErrorHandler, ParsingProtocol}
+import spray.json.JsObject
 
 trait JsonParseSupport {
-  protected def readOptionField[U: ParsingProtocol](obj: JsObject,
-                                                    fieldName: String,
-                                                    onParseError: ParseErrorHandler): Parsed[Option[U]] = {
+  protected def readFieldOptional[U](
+      obj: JsObject,
+      fieldName: String,
+      onParseError: ParseFieldErrorHandler
+  )(implicit pp: ParsingProtocol[U]): Parsed[OptionalField[U]] = {
     obj.fields.get(fieldName) match {
-      case Some(anyValue) =>
-        anyValue match {
-          case value if value == JsNull => None.validNel
-          case value => read(value).map(Option(_)).orElse(onParseError(fieldName, value).invalidNel)
-        }
-      case None => None.validNel
-    }
-  }
-
-  protected def readFieldOptional[U: ParsingProtocol](obj: JsObject,
-                                                      fieldName: String,
-                                                      onParseError: ParseErrorHandler): Parsed[OptionalField[U]] = {
-    obj.fields.get(fieldName) match {
-      case Some(value) => read(value).map(Right(_)).orElse(onParseError(fieldName, value).invalidNel)
+      case Some(value) =>
+        pp.read(value)(onParseError(fieldName))
+          .map(maybeValue => Right(Option(maybeValue)))
+          .orElse(onParseError(fieldName)(value).invalidNel)
       case None => Left(Unit).validNel
     }
   }
 
-  protected def readObjectField[U: ParsingProtocol](obj: JsObject,
-                                                    fieldName: String,
-                                                    onFieldMissing: String => ParsingError): Parsed[U] = {
+  protected def readObjectField[U](
+      obj: JsObject,
+      fieldName: String,
+      onFieldMissing: MissingFieldErrorHandler,
+      onParseError: ParseFieldErrorHandler
+  )(implicit pp: ParsingProtocol[U]): Parsed[U] = {
     obj.fields.get(fieldName) match {
-      case Some(jsObject: JsObject) => implicitly[ParsingProtocol[U]].read(jsObject)
+      case Some(jsObject: JsObject) => pp.read(jsObject)(onParseError(fieldName))
       case None => onFieldMissing(fieldName).invalidNel
+      case Some(value) => onParseError(fieldName)(value).invalidNel
     }
   }
 
-  protected def readField[U: ParsingProtocol](obj: JsObject,
-                                              fieldName: String,
-                                              onFieldMissing: String => ParsingError): Parsed[U] = {
+  protected def readField[U](obj: JsObject,
+                             fieldName: String,
+                             onFieldMissing: MissingFieldErrorHandler,
+                             onParseError: ParseFieldErrorHandler)(
+      implicit pp: ParsingProtocol[U]
+  ): Parsed[U] = {
     obj.fields.get(fieldName) match {
-      case Some(field) => read(field)
+      case Some(field) => pp.read(field)(onParseError(fieldName))
       case None => onFieldMissing(fieldName).invalidNel
     }
   }
+}
 
-  protected def read[U: ParsingProtocol](value: JsValue): Parsed[U] = {
-    implicitly[ParsingProtocol[U]].read(value)
+object JsonParser {
+  def parse[T: ParsingProtocol](obj: JsObject, onParseError: ParseFieldErrorHandler): Parsed[T] = {
+    implicitly[ParsingProtocol[T]].read(obj)(onParseError(""))
+  }
+
+  implicit class JsonParserOps(obj: JsObject) {
+    def parseAs[T: ParsingProtocol](onParseError: ParseFieldErrorHandler): Parsed[T] =
+      JsonParser.parse(obj, onParseError)
   }
 }

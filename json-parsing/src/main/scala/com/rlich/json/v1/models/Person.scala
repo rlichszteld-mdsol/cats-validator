@@ -1,7 +1,8 @@
 package com.rlich.json.v1.models
 
 import cats.implicits._
-import com.rlich.json.core.{OptionalField, Parsed, ParsingProtocol}
+import com.rlich.json.core.{OptionalField, Parsed}
+import com.rlich.json.v1.core.ParsingProtocol
 import com.rlich.json.v1.parsing.DefaultJsonParseSupport
 import spray.json.JsValue
 

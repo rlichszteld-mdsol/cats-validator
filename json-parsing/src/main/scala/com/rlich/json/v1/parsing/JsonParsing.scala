@@ -2,6 +2,7 @@ package com.rlich.json.v1.parsing
 
 import com.rlich.json.core._
 import cats.implicits._
+import com.rlich.json.v1.core.{JsConverter, MissingFieldErrorHandler, ParseErrorHandler, ParsingProtocol}
 import spray.json._
 
 trait JsonParseSupport {
@@ -38,14 +39,17 @@ trait JsonParseSupport {
                                      onParseError: ParseErrorHandler): Parsed[OptionalField[U]] = {
     obj.fields.get(fieldName) match {
       case Some(value: JsValue) =>
-        parse.lift(value).map(Right(_).validNel).getOrElse(onParseError(fieldName, value).invalidNel)
+        parse
+          .lift(value)
+          .map(maybeValue => Right(Option(maybeValue)).validNel)
+          .getOrElse(onParseError(fieldName, value).invalidNel)
       case None => Left(Unit).validNel
     }
   }
 
   protected def readObjectField[U: ParsingProtocol](obj: JsObject,
                                                     fieldName: String,
-                                                    onFieldMissing: String => ParsingError): Parsed[U] = {
+                                                    onFieldMissing: MissingFieldErrorHandler): Parsed[U] = {
     obj.fields.get(fieldName) match {
       case Some(jsObject: JsObject) => implicitly[ParsingProtocol[U]].read(jsObject)
       case None => onFieldMissing(fieldName).invalidNel
