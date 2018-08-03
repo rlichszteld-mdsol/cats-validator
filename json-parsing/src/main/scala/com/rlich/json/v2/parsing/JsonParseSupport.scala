@@ -8,9 +8,8 @@ import spray.json.JsObject
 trait JsonParseSupport {
   protected def readFieldOptional[U](
       obj: JsObject,
-      fieldName: String,
-      onParseError: ParseFieldErrorHandler
-  )(implicit pp: ParsingProtocol[U]): Parsed[OptionalField[U]] = {
+      fieldName: String
+  )(implicit pp: ParsingProtocol[U], onParseError: ParseFieldErrorHandler): Parsed[OptionalField[U]] = {
     obj.fields.get(fieldName) match {
       case Some(value) =>
         pp.read(value)(onParseError(fieldName))
@@ -20,12 +19,11 @@ trait JsonParseSupport {
     }
   }
 
-  protected def readObjectField[U](
-      obj: JsObject,
-      fieldName: String,
+  protected def readObjectField[U](obj: JsObject, fieldName: String)(
+      implicit pp: ParsingProtocol[U],
       onFieldMissing: MissingFieldErrorHandler,
       onParseError: ParseFieldErrorHandler
-  )(implicit pp: ParsingProtocol[U]): Parsed[U] = {
+  ): Parsed[U] = {
     obj.fields.get(fieldName) match {
       case Some(jsObject: JsObject) => pp.read(jsObject)(onParseError(fieldName))
       case None => onFieldMissing(fieldName).invalidNel
@@ -33,12 +31,10 @@ trait JsonParseSupport {
     }
   }
 
-  protected def readField[U](obj: JsObject,
-                             fieldName: String,
-                             onFieldMissing: MissingFieldErrorHandler,
-                             onParseError: ParseFieldErrorHandler)(
-      implicit pp: ParsingProtocol[U]
-  ): Parsed[U] = {
+  protected def readField[U](obj: JsObject, fieldName: String)(implicit
+                                                               pp: ParsingProtocol[U],
+                                                               onFieldMissing: MissingFieldErrorHandler,
+                                                               onParseError: ParseFieldErrorHandler): Parsed[U] = {
     obj.fields.get(fieldName) match {
       case Some(field) => pp.read(field)(onParseError(fieldName))
       case None => onFieldMissing(fieldName).invalidNel
@@ -47,12 +43,12 @@ trait JsonParseSupport {
 }
 
 object JsonParser {
-  def parse[T: ParsingProtocol](obj: JsObject, onParseError: ParseFieldErrorHandler): Parsed[T] = {
+  def parse[T: ParsingProtocol](obj: JsObject)(implicit onParseError: ParseFieldErrorHandler): Parsed[T] = {
     implicitly[ParsingProtocol[T]].read(obj)(onParseError(""))
   }
 
   implicit class JsonParserOps(obj: JsObject) {
-    def parseAs[T: ParsingProtocol](onParseError: ParseFieldErrorHandler): Parsed[T] =
-      JsonParser.parse(obj, onParseError)
+    def parseAs[T: ParsingProtocol](implicit onParseError: ParseFieldErrorHandler): Parsed[T] =
+      JsonParser.parse(obj)
   }
 }

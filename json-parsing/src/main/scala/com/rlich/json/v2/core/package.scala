@@ -10,6 +10,6 @@ package object core {
   type MissingFieldErrorHandler = String => ParsingError
 
   trait ParsingProtocol[T] {
-    def read(value: JsValue)(onParseError: ParseValueErrorHandler): Parsed[T]
+    def read(value: JsValue)(implicit onParseError: ParseValueErrorHandler): Parsed[T]
   }
 }

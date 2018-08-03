@@ -72,10 +72,11 @@ object Main extends App {
 
   {
     import com.rlich.json.v2.parsing.JsonParser._
+    import com.rlich.json.v2.parsing.Implicits.ErrorHandlers._
     import com.rlich.json.v2.parsing.DefaultJsonParseSupport._
     import com.rlich.json.v2.models.TestModelParsingProtocol._
 
-    val v2Result = v2obj.parseAs[TestModel](defaultParseErrorHandler)
+    val v2Result = v2obj.parseAs[TestModel]
     processResult(v2Result)
   }
 }

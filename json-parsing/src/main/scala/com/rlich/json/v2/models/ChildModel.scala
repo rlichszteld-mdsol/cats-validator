@@ -12,9 +12,8 @@ trait ChildModelParsingProtocol {
 
   implicit object ChildModelParsingFormat extends ParsingProtocol[ChildModel] with DefaultJsonParseSupport {
 
-    def read(value: JsValue)(
-        onParseError: ParseValueErrorHandler
-    ): Parsed[ChildModel] = {
+    def read(value: JsValue)(implicit
+                             onParseError: ParseValueErrorHandler): Parsed[ChildModel] = {
       val obj = value.asJsObject
       (
         readString(obj, "field1"),

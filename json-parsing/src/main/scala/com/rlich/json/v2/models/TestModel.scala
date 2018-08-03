@@ -17,17 +17,17 @@ trait TestModelParsingProtocol {
   implicit object TestModelParsingFormat extends ParsingProtocol[TestModel] with DefaultJsonParseSupport {
 
     import ChildModelParsingProtocol._
+    import com.rlich.json.v2.parsing.Implicits.ErrorHandlers._
 
-    def read(value: JsValue)(
-        onParseError: ParseValueErrorHandler
-    ): Parsed[TestModel] = {
+    def read(value: JsValue)(implicit
+                             onParseError: ParseValueErrorHandler): Parsed[TestModel] = {
       val obj = value.asJsObject
       (
         readString(obj, "string_data"),
         readInt(obj, "int_data"),
         readBool(obj, "bool_data"),
-        readFieldOptional[Option[String]](obj, "optional_field", defaultParseErrorHandler),
-        readField[Option[ChildModel]](obj, "child", defaultMissingFieldHandler, defaultParseErrorHandler)
+        readFieldOptional[Option[String]](obj, "optional_field"),
+        readField[Option[ChildModel]](obj, "child")
       ).mapN(TestModel)
     }
   }
